@@ -1,7 +1,7 @@
 import cv2
 import os
 
-def create_masks_from_directory(source_directory, output_directory,threshold_value=30):
+def create_masks_from_directory(source_directory, output_directory, redirect_directory, threshold_value=30):
     # Check if output directory exists, create it if it doesn't
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -17,17 +17,22 @@ def create_masks_from_directory(source_directory, output_directory,threshold_val
 
             _, mask = cv2.threshold(image, threshold_value, 255, cv2.THRESH_BINARY)
             mask_file_path = os.path.join(output_directory, f"mask_{filename}")
-            
+            redirect_file_path = os.path.join(redirect_directory,filename )
+
             cv2.imwrite(mask_file_path, mask)
+            cv2.imwrite(redirect_file_path, image)
             print(f"Mask saved: {mask_file_path}")
 
 
-# Example usage
-source_dir = "/Users/namjihyeon/Desktop/hankooktier/unet/src/data/imgs"
-all_dir = "/Users/namjihyeon/Desktop/hankooktier/unet/src/data/Footshape_Gray_Image_All"
 
-all_mask_dir = './data/masks/all'
-result_mask_dir = './data/masks/all'
+if __name__ == '__main__':
+    # all_dir = "/Users/namjihyeon/Desktop/hankooktier/unet/src/data/Footshape_Gray_Image_All"
+    # all_mask_dir = './data/masks'
+    # redirect_dir = './data/redirect'
+    
+    result_dir = "../../data_result/grey"
+    result_mask_dir = '../../data_result/masks'
+    redirect_dir = '../../data_result/redirect'
 
-create_masks_from_directory(source_dir, result_mask_dir)
-create_masks_from_directory(all_dir, all_mask_dir)
+    # create_masks_from_directory(all_dir, all_mask_dir, redirect_dir)
+    create_masks_from_directory(result_dir, result_mask_dir, redirect_dir)

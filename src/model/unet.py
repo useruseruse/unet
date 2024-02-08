@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torchvision import models
 from torch.nn.functional import relu
 
 class UNet(nn.Module):
@@ -79,3 +78,22 @@ class UNet(nn.Module):
         out = self.outconv(xd32)
 
         return out
+    
+    def get_latent_vector(self, x):
+        # Encoder
+        xe11 = relu(self.e11(x))
+        xe12 = relu(self.e12(xe11))
+        xp1 = self.pool1(xe12)
+
+        xe21 = relu(self.e21(xp1))
+        xe22 = relu(self.e22(xe21))
+        xp2 = self.pool2(xe22)
+
+        xe31 = relu(self.e31(xp2))
+        xe32 = relu(self.e32(xe31))
+        xp3 = self.pool3(xe32)
+
+        xe41 = relu(self.e41(xp3))
+        xe42 = relu(self.e42(xe41))
+
+        return xe42
