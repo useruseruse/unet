@@ -75,7 +75,8 @@ class UNet(nn.Module):
         xd32 = relu(self.d32(xd31))
 
         # Output layer
-        out = self.outconv(xd32)
+        # out = self.outconv(xd32)
+        out = torch.sigmoid(self.outconv(xd32))
 
         return out
     

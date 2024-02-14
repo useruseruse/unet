@@ -1,16 +1,17 @@
 import torch 
 from model.dice_loss import dice_loss
+import torch.nn as nn
 
 
-def train(model, optimizer, train_loader,  num_epochs=20):
+def train(model, optimizer, train_loader,  num_epochs=5):
+    print("START Training model")
+
     for epoch in range(num_epochs): 
         for batch_idx, (image1, image2) in enumerate(train_loader):
-            ## for testing 
-            output_1 = model(image1)        
-            output_2 = model(image2)
 
-            # Compute loss
-            loss = dice_loss(output_1, output_2)  # Or use image2, depending on your setup
+            output_1 = model(image1)        
+            loss = dice_loss(output_1, image2)  
+            # loss = nn.CrossEntropyLoss()(output_1, output_2)
 
             optimizer.zero_grad()
             loss.backward()
@@ -31,12 +32,13 @@ def train(model, optimizer, train_loader,  num_epochs=20):
     
 
 def test(model, test_loader):
-    model.eval()  # Set the model to evaluation mode
+    model.eval() 
     with torch.no_grad():
         for image_1, image_2  in test_loader:
             output_1 = model(image_1)
             output_2 = model(image_2)
             loss = dice_loss(output_1, output_2)
-            # Here, you can print out loss, or store it for analysis
+            # loss = nn.CrossEntropyLoss()(output_1, output_2)
+
             print("loss", loss)
 

@@ -1,47 +1,55 @@
 import os
 import torch
-from torchvision import transforms 
-from torch.utils.data import DataLoader, random_split
 import torch.optim as optim
+from preprocess.create_mask import *
 
 from model.unet import UNet 
-from preprocess.dataset import CustomDataset
+from preprocess.dataset import *
 from train import train, test
 
+def load_model(model, optimizer, model_path):
+    '''
+        pretrained model 을 성공적으로 로드했을 경우 반환
+    '''
+    try:
+        model.load_state_dict(torch.load(model_path))
+        model.eval()
+        print(" SUCCESS to LOAD pretrained model ")
+        return model, True
+    
+    except:
+        print(" NO pretrained model ")
+        return model, False
+
+def main( 
+        image_directory = None, 
+        mask_directory = None,
+        model_path = None,
+    ):
+   
+
+    # 1. mask 이미지 셋이 준비되지 않았을 경우. 
+    if(os.path.exists(mask_directory)):
+        mask_directory = create_masks_from_directory(image_directory)
+        print("mask dataset is saved", mask_directory)    
+
+    # 2. dataset 준비 
+    train_loader, test_loader = load_dataloader(image_directory, mask_directory)
+    
+    # 3. pretrained 된 모델이 있을 경우 불러오기 
+    unet = UNet(n_channels=1)                               # 가중치를 덮어쓸 모델 기본 아키텍쳐 불러오기
+    optimizer = optim.Adam(unet.parameters(), lr=0.0005)
+    model, success = load_model(unet, optimizer, model_path) 
+
+    # 4. pretrained 된 모델이 없을 경우, 새로 train 하기
+    if not success:
+        train(model, optimizer, train_loader, num_epochs=5)
+
+
+
 if __name__ == "__main__":
-    # DataLoader
-    image_directory = "../data/redirect"
-    mask_directory = "../data/masks"
-
-    transform = transforms.Compose([
-        transforms.Resize((128,128)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.456], std=[0.224])
-    ])
-
-    custom_dataset = CustomDataset(image_directory, mask_directory, transform=transform)
-    train_size = int(0.8 * len(custom_dataset))
-    test_size = len(custom_dataset) - train_size
-    train_dataset, test_dataset = random_split(custom_dataset, [train_size, test_size])
-    train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-    print("Complete loading dataset")
-
-    model = UNet(n_channels=1)
-    optimizer = optim.Adam(model.parameters(), lr=0.0005)
-    checkpoint_path = './model_checkpoint.pth'  # Path to your checkpoint file
-
-    if os.path.exists(checkpoint_path) :
-        # Load the saved model and optimizer state
-        checkpoint = torch.load(checkpoint_path)
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        print("Loaded saved model and optimizer state.")
-    else:
-        # Train the model
-        num_epochs = 17
-        train(model, optimizer, num_epochs, train_loader, checkpoint_path)
-        print("Complete training")
-
-    test(model, test_loader)  # Assuming 'test' function takes model and test_loader as arguments
-    print("Test model")
+    image_directory = "../data_grey/redirect"
+    mask_directory = "../data_grey/masks"
+    # checkpoint_path = './model_checkpoint.pth'  
+    main(image_directory=image_directory, mask_directory=mask_directory)
+    # mask_directory=mask_directory)
