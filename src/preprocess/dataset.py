@@ -36,7 +36,8 @@ def load_dataloader(image_directory, mask_directory):
     '''
     custom_dataset = CustomDataset(image_directory, mask_directory, transform=None)
     
-    sampled_size = int(0.15 * len(custom_dataset))
+    # sampled_size = int(0.15 * len(custom_dataset))
+    sampled_size = len(custom_dataset)
     train_size = int(0.8 *sampled_size)
     test_size = sampled_size - train_size
     

@@ -1,7 +1,7 @@
 import torch 
 from model.dice_loss import dice_loss
 import torch.nn as nn
-
+from display_segmentation import *
 
 def train(model, optimizer, train_loader,  num_epochs=5):
     print("START Training model")
@@ -18,7 +18,7 @@ def train(model, optimizer, train_loader,  num_epochs=5):
             optimizer.step()
 
         # epoch 10, 20, 30 당 checkpoint 설정
-        if(epoch % 10 == 0):
+        if(epoch % 10 == 9):
             torch.save({
                 'epoch': epoch,
                 'batch_idx': batch_idx,
@@ -36,8 +36,8 @@ def test(model, test_loader):
     with torch.no_grad():
         for image_1, image_2  in test_loader:
             output_1 = model(image_1)
-            output_2 = model(image_2)
-            loss = dice_loss(output_1, output_2)
+            display_segmentation(output_tensor=output_1[0])
+            loss = dice_loss(output_1, image_2)
             # loss = nn.CrossEntropyLoss()(output_1, output_2)
 
             print("loss", loss)

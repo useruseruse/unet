@@ -12,13 +12,14 @@ def load_model(model, optimizer, model_path):
         pretrained model 을 성공적으로 로드했을 경우 반환
     '''
     try:
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(model_path)['model_state_dict'])
+        optimizer.load_state_dict(torch.load(model_path)['optimizer_state_dict'])
         model.eval()
         print(" SUCCESS to LOAD pretrained model ")
         return model, True
     
     except:
-        print(" NO pretrained model ")
+        print(" NO pretrained model ") 
         return model, False
 
 def main( 
@@ -29,7 +30,7 @@ def main(
    
 
     # 1. mask 이미지 셋이 준비되지 않았을 경우. 
-    if(os.path.exists(mask_directory)):
+    if(mask_directory == None or os.path.exists(mask_directory)):
         mask_directory = create_masks_from_directory(image_directory)
         print("mask dataset is saved", mask_directory)    
 
@@ -43,13 +44,13 @@ def main(
 
     # 4. pretrained 된 모델이 없을 경우, 새로 train 하기
     if not success:
-        train(model, optimizer, train_loader, num_epochs=5)
+        train(model, optimizer, train_loader, num_epochs=50)
 
+    test(model, test_loader)
 
 
 if __name__ == "__main__":
-    image_directory = "../data_grey/redirect"
-    mask_directory = "../data_grey/masks"
-    # checkpoint_path = './model_checkpoint.pth'  
-    main(image_directory=image_directory, mask_directory=mask_directory)
-    # mask_directory=mask_directory)
+    image_directory = "../data_result/redirect"
+    mask_directory = "../data_result/masks"
+    checkpoint_path = './model_checkpoint.pth'  
+    main(image_directory=image_directory, mask_directory=mask_directory, model_path="/Users/namjihyeon/Desktop/hankooktier/unet/src/model_cache/model_checkpoint_29.pth")#, mask_directory=mask_directory)
