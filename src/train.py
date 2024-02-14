@@ -1,6 +1,7 @@
 import torch 
 from model.dice_loss import dice_loss
 import torch.nn as nn
+from cosine import *
 from display_segmentation import *
 
 def train(model, optimizer, train_loader,  num_epochs=5):
@@ -36,9 +37,12 @@ def test(model, test_loader):
     with torch.no_grad():
         for image_1, image_2  in test_loader:
             output_1 = model(image_1)
-            display_segmentation(output_tensor=output_1[0])
+            display_segmentation(input_tensor = image_1[0], output_tensor=output_1[0])
             loss = dice_loss(output_1, image_2)
-            # loss = nn.CrossEntropyLoss()(output_1, output_2)
-
+            # loss =    nn.CrossEntropyLoss()(output_1, output_2)
             print("loss", loss)
+
+
+
+
 
